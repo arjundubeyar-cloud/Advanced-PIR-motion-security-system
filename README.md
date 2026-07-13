@@ -247,33 +247,7 @@ When the project runs successfully, the system will display:
 
 ---
 
-## Tinkercad Simulation Notes
 
-- Use the 16x2 LCD in 4-bit mode.
-- Adjust the potentiometer until text appears clearly.
-- Simulate motion using the PIR sensor.
-- Change the LDR light level to test day/night behavior.
-- Press the reset button to stop the alarm.
-
----
-
-## Folder Structure
-
-```text
-PIR-Security-System-LCD/
-├── README.md
-├── code/
-│   └── pir_security_system_lcd.ino
-├── circuit/
-│   └── tinkercad_circuit.png
-├── screenshots/
-│   ├── lcd_output.png
-│   └── serial_monitor.png
-└── docs/
-    └── linkedin_post.txt
-```
-
----
 
 ## GitHub Description
 
