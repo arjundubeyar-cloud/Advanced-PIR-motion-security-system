@@ -1,0 +1,108 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int pirPin = A0;
+const int ldrPin = A1;
+const int buzzerPin = 9;
+const int redLedPin = 13;
+const int greenLedPin = 8;
+const int resetPin = 7;
+
+bool alarmTriggered = false;
+int lightThreshold = 450;
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(ldrPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(redLedPin, OUTPUT);
+  pinMode(greenLedPin, OUTPUT);
+  pinMode(resetPin, INPUT_PULLUP);
+
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+
+  digitalWrite(buzzerPin, LOW);
+  digitalWrite(redLedPin, LOW);
+  digitalWrite(greenLedPin, HIGH);
+
+  lcd.clear();
+  lcd.print("System Booting");
+  lcd.setCursor(0, 1);
+  lcd.print("Please Wait");
+  Serial.println("System Booting");
+  delay(2000);
+
+  lcd.clear();
+  lcd.print("System Armed");
+  lcd.setCursor(0, 1);
+  lcd.print("No Motion");
+  Serial.println("System Armed");
+}
+
+void loop() {
+  int motionState = digitalRead(pirPin);
+  int lightValue = analogRead(ldrPin);
+  int resetState = digitalRead(resetPin);
+
+  bool isDark = (lightValue < lightThreshold);
+
+  if (!alarmTriggered) {
+    digitalWrite(greenLedPin, HIGH);
+    digitalWrite(redLedPin, LOW);
+    digitalWrite(buzzerPin, LOW);
+  }
+
+  if (motionState == HIGH && !alarmTriggered) {
+    alarmTriggered = true;
+
+    digitalWrite(greenLedPin, LOW);
+    digitalWrite(redLedPin, HIGH);
+    digitalWrite(buzzerPin, HIGH);
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Motion Detected");
+    lcd.setCursor(0, 1);
+    lcd.print(isDark ? "Night Alert" : "Day Alert");
+
+    Serial.print("Motion Detected | Light: ");
+    Serial.print(lightValue);
+    Serial.print(" | ");
+    Serial.println(isDark ? "Night" : "Day");
+    delay(300);
+  }
+
+  if (alarmTriggered) {
+    if (resetState == LOW) {
+      alarmTriggered = false;
+
+      digitalWrite(buzzerPin, LOW);
+      digitalWrite(redLedPin, LOW);
+      digitalWrite(greenLedPin, HIGH);
+
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Alarm Reset");
+      lcd.setCursor(0, 1);
+      lcd.print("System Armed");
+
+      Serial.println("Alarm Reset");
+      Serial.println("System Armed");
+      delay(500);
+    }
+  } else {
+    lcd.setCursor(0, 0);
+    lcd.print("System Armed   ");
+    lcd.setCursor(0, 1);
+    lcd.print(isDark ? "Dark Mode      " : "Bright Mode    ");
+  }
+
+  Serial.print("PIR: ");
+  Serial.print(motionState);
+  Serial.print(" LDR: ");
+  Serial.println(lightValue);
+
+  delay(200);
+}
